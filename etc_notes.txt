@@ -5,7 +5,10 @@ https://www.youtube.com/watch?v=KOSS24P3_fY&t=879s&ab_channel=NicolaiNielsen
 https://www.youtube.com/watch?v=KOSS24P3_fY&t=879s&ab_channel=NicolaiNielsen
 
 
-
+Ideas:
+B&W to RGB
+Upscaling
+(literally anything with an easy before/after type thing)
 
 pre-trained model or train my own?
 or refine a pre-trained model? (might be weird finding a pre-trained model for b&w to rgb?)
@@ -25,3 +28,20 @@ pytorch? tensorflow?
 make sure to make use of GPU
 
 
+
+https://debuggercafe.com/image-super-resolution-using-deep-learning-and-pytorch/
+https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Super-Resolution
+https://github.com/sgrvinod/Deep-Tutorials-for-PyTorch
+
+https://pytorch.org/tutorials/beginner/introyt/modelsyt_tutorial.html
+https://machinelearningmastery.com/pytorch-tutorial-develop-deep-learning-models/
+
+
+https://lukemelas.github.io/image-colorization.html
+https://github.com/Time0o/colorful-colorization
+https://github.com/williamcfrancis/CNN-Image-Colorization-Pytorch
+
+*** UPSCALING: https://github.com/kunal-visoulia/Image-Restoration-using-SRCNN
+
+
+https://blog.paperspace.com/writing-resnet-from-scratch-in-pytorch/
