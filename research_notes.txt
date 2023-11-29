@@ -1,0 +1,3 @@
+compile dataset (personal images)
+split dataset into training/validation (90/10)
+format dataset (compression and resizing)
