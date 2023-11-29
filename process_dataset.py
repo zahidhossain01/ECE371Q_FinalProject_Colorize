@@ -95,7 +95,7 @@ if __name__ == "__main__":
     # t2_s = time.perf_counter()
 
     print("Processing Elapsed Time:")
-    # print(f"Single Threaded: {round(t2_s - t1_s, 3)} s")
-    print(f"Multiprocessing: {round(t2_mp - t1_mp, 3)} s")
+    # print(f"Single Threaded: {t2_s - t1_s:.3f} s")
+    print(f"Multiprocessing: {t2_mp - t1_mp:.3f} s")
         
 

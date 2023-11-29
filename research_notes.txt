@@ -1,3 +1,16 @@
 compile dataset (personal images)
 split dataset into training/validation (90/10)
 format dataset (compression and resizing)
+
+https://towardsdatascience.com/colorizing-black-white-images-with-u-net-and-conditional-gan-a-tutorial-81b2df111cd8
+https://medium.com/@pranav.kushare2001/colorize-your-black-and-white-photos-using-ai-4652a34e967
+https://github.com/Pranav082001/Neural-Image-Colorizer
+https://anne-guilbert.medium.com/black-and-white-image-colorization-with-deep-learning-53855922cda6
+https://lukemelas.github.io/image-colorization.html
+https://github.com/Time0o/colorful-colorization/tree/master
+https://github.com/williamcfrancis/CNN-Image-Colorization-Pytorch
+
+autoencoder?
+train on L*a*b instead of RGB
+    [from towardsdatascience] input can be L channel, model can predict *a and *b channels (1 input, 2 outputs)
+    as opposed to input L, predict RGB (1 input, 3 outputs) < this is less stable and more difficult
