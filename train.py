@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms, datasets
+from torchvision import transforms
 from torchvision.transforms.functional import to_pil_image
 import torchvision.models as models
 from skimage.color import rgb2lab, lab2rgb, rgb2gray
@@ -12,15 +12,29 @@ import matplotlib.pyplot as plt
 import os
 import time
 
-# CUDA stuff
-# https://stackoverflow.com/questions/53695105/why-we-need-image-tocuda-when-we-have-model-tocuda
-# https://pytorch.org/docs/stable/notes/cuda.html#cuda-semantics
-# either tensor.cuda() or tensor.to(device=cuda) (where cuda=torch.device('cuda'))
+
+# img_transform_size = 224
 # BATCH_SIZE = 50
-BATCH_SIZE = 15
-# LEARNING_RATE = 1e-2
-# LEARNING_RATE = .001
+# LEARNING_RATE = .01
+
+# For quick testing, 1m/ep
+# img_transform_size = 128
+# BATCH_SIZE = 64
+# LEARNING_RATE = .0001
+
+# For quick testing, 1m/ep
+img_transform_size = 128
+BATCH_SIZE = 32
 LEARNING_RATE = .0001
+
+# Decent Results, 4m/ep
+# img_transform_size = 608
+# BATCH_SIZE = 15
+# LEARNING_RATE = .0001
+
+best_losses = 1e10
+epochs = 15
+
 use_gpu = torch.cuda.is_available()
 
 class ImageDataset(Dataset):
@@ -52,7 +66,7 @@ class ImageDataset(Dataset):
 
 
 class AverageMeter(object):
-    '''A handy class from the PyTorch ImageNet tutorial''' 
+    '''from PyTorch ImageNet tutorial''' 
     def __init__(self):
         self.reset()
     def reset(self):
@@ -77,11 +91,9 @@ def to_rgb(grayscale_input, ab_input, save_path=None, save_name=None):
         plt.imsave(arr=grayscale_input, fname='{}{}'.format(save_path['grayscale'], save_name), cmap='gray')
         plt.imsave(arr=color_image, fname='{}{}'.format(save_path['colorized'], save_name))
 
-# size = 224
-# size = 504
-size = 608
+
 transform = transforms.Compose([
-    transforms.Resize((size,size)),
+    transforms.Resize((img_transform_size,img_transform_size)),
 ])
 train_set = ImageDataset(root_dir="datasets/training/rgb", transform=transform)
 val_set = ImageDataset(root_dir="datasets/validation/rgb", transform=transform)
@@ -102,9 +114,6 @@ val_loader = DataLoader(val_set, batch_size=BATCH_SIZE, shuffle=False)
 # print(read_img)
 # plt.imshow(read_img, cmap='gray', vmin=0, vmax=255)
 # plt.show()
-
-
-
 
 
 class Net(nn.Module):
@@ -153,38 +162,36 @@ def validate(val_loader, model, criterion, save_images, epoch):
 
     end = time.time()
     already_saved_images = False
-    # for i, (input_gray, input_ab, target) in enumerate(val_loader):
     for i, (input_gray, input_ab) in enumerate(val_loader):
         data_time.update(time.time() - end)
 
-    # Use GPU
-    # if use_gpu: input_gray, input_ab, target = input_gray.cuda(), input_ab.cuda(), target.cuda()
-    if use_gpu: input_gray, input_ab = input_gray.cuda(), input_ab.cuda()
+        # Use GPU
+        if use_gpu: input_gray, input_ab = input_gray.cuda(), input_ab.cuda()
 
-    # Run model and record loss
-    output_ab = model(input_gray) # throw away class predictions
-    loss = criterion(output_ab, input_ab)
-    losses.update(loss.item(), input_gray.size(0))
+        # Run model and record loss
+        output_ab = model(input_gray) # throw away class predictions
+        loss = criterion(output_ab, input_ab)
+        losses.update(loss.item(), input_gray.size(0))
 
-    # Save images to file
-    if save_images and not already_saved_images:
-        already_saved_images = True
-        for j in range(min(len(output_ab), 10)): # save at most 5 images
-            save_path = {'grayscale': 'outputs/gray/', 'colorized': 'outputs/color/'}
-            # save_name = 'img-{}-epoch-{}.jpg'.format(i * val_loader.batch_size + j, epoch)
-            save_name = f'img-{i * val_loader.batch_size + j}-epoch-{epoch}.jpg'
-            to_rgb(input_gray[j].cpu(), ab_input=output_ab[j].detach().cpu(), save_path=save_path, save_name=save_name)
+        # Save images to file
+        if save_images and not already_saved_images:
+            already_saved_images = True
+            # for j in range(min(len(output_ab), 10)): # save at most 5 images
+            for j in range(len(output_ab)): # p sure this is batch size
+                save_path = {'grayscale': 'outputs/gray/', 'colorized': 'outputs/color/'}
+                save_name = f'img-{i * val_loader.batch_size + j}-epoch-{epoch}.jpg'
+                to_rgb(input_gray[j].cpu(), ab_input=output_ab[j].detach().cpu(), save_path=save_path, save_name=save_name)
 
-    # Record time to do forward passes and save images
-    batch_time.update(time.time() - end)
-    end = time.time()
+        # Record time to do forward passes and save images
+        batch_time.update(time.time() - end)
+        end = time.time()
 
-    # Print model accuracy -- in the code below, val refers to both value and validation
-    if i % 25 == 0:
-        print('Validate: [{0}/{1}]\t'
-            'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-            'Loss {loss.val:.4f} ({loss.avg:.4f})\t'.format(
-                i, len(val_loader), batch_time=batch_time, loss=losses))
+        # Print model accuracy -- in the code below, val refers to both value and validation
+        if i % 25 == 0:
+            print('Validate: [{0}/{1}]\t'
+                'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+                'Loss {loss.val:.4f} ({loss.avg:.4f})\t'.format(
+                    i, len(val_loader), batch_time=batch_time, loss=losses))
 
     print('Finished validation.')
     return losses.avg
@@ -197,11 +204,9 @@ def train(train_loader, model, criterion, optimizer, epoch):
     batch_time, data_time, losses = AverageMeter(), AverageMeter(), AverageMeter()
 
     end = time.time()
-    # for i, (input_gray, input_ab, target) in enumerate(train_loader):
     for i, (input_gray, input_ab) in enumerate(train_loader):
     
         # Use GPU if available
-        # if use_gpu: input_gray, input_ab, target = input_gray.cuda(), input_ab.cuda(), target.cuda()
         if use_gpu: input_gray, input_ab = input_gray.cuda(), input_ab.cuda()
 
         # Record time to load data (above)
@@ -247,8 +252,7 @@ os.makedirs('outputs/color', exist_ok=True)
 os.makedirs('outputs/gray', exist_ok=True)
 os.makedirs('checkpoints', exist_ok=True)
 save_images = True
-best_losses = 1e10
-epochs = 15
+
 # 35 epochs = ~50min
 
 
@@ -265,4 +269,4 @@ for epoch in range(epochs):
         torch.save(model.state_dict(), 'checkpoints/model-epoch-{}-losses-{:.3f}.pth'.format(epoch+1,losses))
 t2 = time.perf_counter()
 print()
-print(f"Training Time: {t2-t1:.3f} s = {(t2-t1)/60:.3f} m")
+print(f"Training Time: {t2-t1:.3f} s = {(t2-t1)/60:.3f} m | {((t2-t1)/60)/epochs:.3f} m/ep")
