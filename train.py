@@ -18,13 +18,8 @@ import time
 # LEARNING_RATE = .01
 
 # For quick testing, 1m/ep
-# img_transform_size = 128
-# BATCH_SIZE = 64
-# LEARNING_RATE = .0001
-
-# For quick testing, 1m/ep
 img_transform_size = 128
-BATCH_SIZE = 32
+BATCH_SIZE = 64
 LEARNING_RATE = .0001
 
 # Decent Results, 4m/ep
@@ -33,7 +28,7 @@ LEARNING_RATE = .0001
 # LEARNING_RATE = .0001
 
 best_losses = 1e10
-epochs = 15
+epochs = 2
 
 use_gpu = torch.cuda.is_available()
 
@@ -257,12 +252,17 @@ save_images = True
 
 
 # Train model
+
+loss_epoch_data = {"epochs": [], "losses": []}
+
 t1 = time.perf_counter()
 for epoch in range(epochs):
     # Train for one epoch, then validate
     train(train_loader, model, loss_fn, optimizer, epoch)
     with torch.no_grad():
         losses = validate(val_loader, model, loss_fn, save_images, epoch)
+        loss_epoch_data["epochs"].append(epoch)
+        loss_epoch_data['losses'].append(losses)
     # Save checkpoint and replace old best model if current model is better
     if losses < best_losses:
         best_losses = losses
@@ -270,3 +270,11 @@ for epoch in range(epochs):
 t2 = time.perf_counter()
 print()
 print(f"Training Time: {t2-t1:.3f} s = {(t2-t1)/60:.3f} m | {((t2-t1)/60)/epochs:.3f} m/ep")
+
+fig, ax = plt.subplots(1,1)
+ax.plot(loss_epoch_data['epochs'], loss_epoch_data['losses'])
+fig.suptitle("Training Loss vs Epoch")
+ax.set_xlabel("epoch")
+ax.set_ylabel("loss")
+fig.tight_layout()
+plt.show()
