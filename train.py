@@ -16,7 +16,7 @@ import time
 # https://stackoverflow.com/questions/53695105/why-we-need-image-tocuda-when-we-have-model-tocuda
 # https://pytorch.org/docs/stable/notes/cuda.html#cuda-semantics
 # either tensor.cuda() or tensor.to(device=cuda) (where cuda=torch.device('cuda'))
-BATCH_SIZE = 100
+BATCH_SIZE = 50
 LEARNING_RATE = 1e-2
 
 class ImageDataset(Dataset):
@@ -44,29 +44,10 @@ class ImageDataset(Dataset):
         return img
 
 
-class SquarePadImage():
-    def __init__(self, sidelength):
-        self.sidelength = sidelength
-    def __call__(self, img):
-        h,w = img.shape
-        if(self.sidelength < max(w, h)):
-            self.sidelength = max(w, h)
-        height_diff = self.sidelength - h
-        width_diff = self.sidelength - w
-        pad_up = height_diff // 2
-        pad_down = height_diff - pad_up
-        pad_left = width_diff // 2
-        pad_right = width_diff - pad_left
-
-        I_pad = np.pad(img, ((pad_up, pad_down), (pad_left, pad_right)), constant_values=0)
-
-        return PIL.Image.fromarray(I_pad)
-
 
 
 transform = transforms.Compose([
-    SquarePadImage(2000),
-    # transforms.Resize((500,500)),
+    transforms.Resize((500,500)),
     transforms.ToTensor(),
 ])
 train_set = ImageDataset(root_dir="datasets/training/bw", transform=transform)

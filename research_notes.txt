@@ -3,6 +3,8 @@ split dataset into training/validation (90/10)
 format dataset (compression and resizing)
 setup dataset/dataloader
 custom SquarePad transform
+^ scratch that, redoing dataset prep by just turning everything into square first lol
+
 
 
 https://towardsdatascience.com/colorizing-black-white-images-with-u-net-and-conditional-gan-a-tutorial-81b2df111cd8

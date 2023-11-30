@@ -2,9 +2,27 @@ from multiprocessing import Pool
 import PIL.Image as Image
 import PIL.ImageOps as ImageOps
 import os
+import shutil
 import time
 import random
+import numpy as np
 from tqdm import tqdm
+
+def squarepad(img, sidelength):
+    h,w,_ = img.shape
+    
+    if(sidelength < max(w, h)):
+        sidelength = max(w, h)
+    height_diff = sidelength - h
+    width_diff = sidelength - w
+    pad_up = height_diff // 2
+    pad_down = height_diff - pad_up
+    pad_left = width_diff // 2
+    pad_right = width_diff - pad_left
+
+    I_pad = np.pad(img, ((pad_up, pad_down), (pad_left, pad_right), (0,0)), constant_values=0)
+
+    return Image.fromarray(I_pad)
 
 def resize_image_training(img_filepath):
     filename = os.path.basename(img_filepath)
@@ -16,6 +34,7 @@ def resize_image_training(img_filepath):
     output_filepath_bw = os.path.join(output_folder_bw, filename)
 
     img = Image.open(img_filepath)
+    img = squarepad(np.asarray(img), 2000)
     img_r = ImageOps.contain(img, (2000,2000)) # resizes image to fit in 2000x2000 box (preserving aspect ratio)
     img_bw = img_r.convert("L")
 
@@ -32,16 +51,18 @@ def resize_image_validation(img_filepath):
     output_filepath_bw = os.path.join(output_folder_bw, filename)
 
     img = Image.open(img_filepath)
+    img = squarepad(np.asarray(img), 2000)
     img_r = ImageOps.contain(img, (2000,2000)) # resizes image to fit in 2000x2000 box (preserving aspect ratio)
     img_bw = img_r.convert("L")
 
-    img_r.save(output_filepath_rgb, quality=95, subsampling=0)
-    img_bw.save(output_filepath_bw, quality=95, subsampling=0)
+    img_r.save(output_filepath_rgb, quality=80, subsampling=0)
+    img_bw.save(output_filepath_bw, quality=80, subsampling=0)
     
     
 
 if __name__ == "__main__":
     input_folder = "datasets/source_images_compressed"
+    # input_folder = "datasets/test_source"
 
 
     input_filenames = os.listdir(input_folder)
@@ -71,13 +92,13 @@ if __name__ == "__main__":
         src = input_filepaths[idx]
         dst = os.path.join("datasets/training/source", input_filenames[idx])
         filepaths_training.append(dst)
-        os.replace(src, dst) # moves file
+        shutil.copyfile(src, dst) # moves file
 
     for idx in tqdm(indices_val):
         src = input_filepaths[idx]
         dst = os.path.join("datasets/validation/source", input_filenames[idx])
         filepaths_validation.append(dst)
-        os.replace(src, dst)
+        shutil.copyfile(src, dst)
     
 
 
