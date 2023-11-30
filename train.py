@@ -18,9 +18,9 @@ import time
 # LEARNING_RATE = .01
 
 # For quick testing, 1m/ep
-img_transform_size = 128
-BATCH_SIZE = 64
-LEARNING_RATE = .0001
+# img_transform_size = 128
+# BATCH_SIZE = 64
+# LEARNING_RATE = .0001
 
 # ?? ??m/ep
 # img_transform_size = 608
@@ -28,12 +28,12 @@ LEARNING_RATE = .0001
 # LEARNING_RATE = .0001
 
 # Decent Results, 4m/ep
-# img_transform_size = 608
-# BATCH_SIZE = 15
-# LEARNING_RATE = .0001
+img_transform_size = 608
+BATCH_SIZE = 15
+LEARNING_RATE = .0001
 
 best_losses = 1e10
-epochs = 6
+epochs = 15
 
 use_gpu = torch.cuda.is_available()
 
