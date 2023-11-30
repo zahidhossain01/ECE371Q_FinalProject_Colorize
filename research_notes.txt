@@ -5,6 +5,9 @@ setup dataset/dataloader
 custom SquarePad transform
 ^ scratch that, redoing dataset prep by just turning everything into square first lol
 
+weeeee we winnin
+playing around with learning_rate, input_size, batch_size
+
 
 
 https://towardsdatascience.com/colorizing-black-white-images-with-u-net-and-conditional-gan-a-tutorial-81b2df111cd8

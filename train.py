@@ -16,8 +16,11 @@ import time
 # https://stackoverflow.com/questions/53695105/why-we-need-image-tocuda-when-we-have-model-tocuda
 # https://pytorch.org/docs/stable/notes/cuda.html#cuda-semantics
 # either tensor.cuda() or tensor.to(device=cuda) (where cuda=torch.device('cuda'))
-BATCH_SIZE = 50
-LEARNING_RATE = 1e-2
+# BATCH_SIZE = 50
+BATCH_SIZE = 15
+# LEARNING_RATE = 1e-2
+# LEARNING_RATE = .001
+LEARNING_RATE = .0001
 use_gpu = torch.cuda.is_available()
 
 class ImageDataset(Dataset):
@@ -74,9 +77,11 @@ def to_rgb(grayscale_input, ab_input, save_path=None, save_name=None):
         plt.imsave(arr=grayscale_input, fname='{}{}'.format(save_path['grayscale'], save_name), cmap='gray')
         plt.imsave(arr=color_image, fname='{}{}'.format(save_path['colorized'], save_name))
 
-
+# size = 224
+# size = 504
+size = 608
 transform = transforms.Compose([
-    transforms.Resize((224,224)),
+    transforms.Resize((size,size)),
 ])
 train_set = ImageDataset(root_dir="datasets/training/rgb", transform=transform)
 val_set = ImageDataset(root_dir="datasets/validation/rgb", transform=transform)
@@ -102,14 +107,14 @@ val_loader = DataLoader(val_set, batch_size=BATCH_SIZE, shuffle=False)
 
 
 
-resnet = models.resnet18(weights='ResNet18_Weights.IMAGENET1K_V1')
 class Net(nn.Module):
     def __init__(self, input_size=128):
         super(Net, self).__init__()
         MIDLEVEL_FEATURE_SIZE = 128
 
         ## First half: ResNet
-        resnet = models.resnet18(num_classes=365) 
+        # resnet = models.resnet18(num_classes=365)
+        resnet = models.resnet18(weights='ResNet18_Weights.IMAGENET1K_V1')
         # Change first conv layer to accept single-channel (grayscale) input
         resnet.conv1.weight = nn.Parameter(resnet.conv1.weight.sum(dim=1).unsqueeze(1)) 
         # Extract midlevel features from ResNet-gray
@@ -243,7 +248,8 @@ os.makedirs('outputs/gray', exist_ok=True)
 os.makedirs('checkpoints', exist_ok=True)
 save_images = True
 best_losses = 1e10
-epochs = 10
+epochs = 15
+# 35 epochs = ~50min
 
 
 # Train model
@@ -259,4 +265,4 @@ for epoch in range(epochs):
         torch.save(model.state_dict(), 'checkpoints/model-epoch-{}-losses-{:.3f}.pth'.format(epoch+1,losses))
 t2 = time.perf_counter()
 print()
-print(f"Training Time: {t2-t1} s")
+print(f"Training Time: {t2-t1:.3f} s = {(t2-t1)/60:.3f} m")
