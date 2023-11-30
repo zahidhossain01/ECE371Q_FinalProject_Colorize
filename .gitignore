@@ -1,6 +1,6 @@
 __pycache__/
 
-results/
+results/training_val_outputs/
 datasets/
 checkpoints/
 outputs/
