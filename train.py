@@ -33,7 +33,7 @@ BATCH_SIZE = 15
 LEARNING_RATE = .0001
 
 best_losses = 1e10
-epochs = 15
+epochs = 16
 
 use_gpu = torch.cuda.is_available()
 
