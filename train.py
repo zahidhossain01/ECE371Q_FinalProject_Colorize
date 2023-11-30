@@ -166,7 +166,8 @@ def validate(val_loader, model, criterion, save_images, epoch):
         already_saved_images = True
         for j in range(min(len(output_ab), 10)): # save at most 5 images
             save_path = {'grayscale': 'outputs/gray/', 'colorized': 'outputs/color/'}
-            save_name = 'img-{}-epoch-{}.jpg'.format(i * val_loader.batch_size + j, epoch)
+            # save_name = 'img-{}-epoch-{}.jpg'.format(i * val_loader.batch_size + j, epoch)
+            save_name = f'img-{i * val_loader.batch_size + j}-epoch-{epoch}.jpg'
             to_rgb(input_gray[j].cpu(), ab_input=output_ab[j].detach().cpu(), save_path=save_path, save_name=save_name)
 
     # Record time to do forward passes and save images
@@ -242,10 +243,11 @@ os.makedirs('outputs/gray', exist_ok=True)
 os.makedirs('checkpoints', exist_ok=True)
 save_images = True
 best_losses = 1e10
-epochs = 5
+epochs = 10
 
 
 # Train model
+t1 = time.perf_counter()
 for epoch in range(epochs):
     # Train for one epoch, then validate
     train(train_loader, model, loss_fn, optimizer, epoch)
@@ -255,3 +257,6 @@ for epoch in range(epochs):
     if losses < best_losses:
         best_losses = losses
         torch.save(model.state_dict(), 'checkpoints/model-epoch-{}-losses-{:.3f}.pth'.format(epoch+1,losses))
+t2 = time.perf_counter()
+print()
+print(f"Training Time: {t2-t1} s")
