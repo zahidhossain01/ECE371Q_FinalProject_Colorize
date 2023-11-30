@@ -22,13 +22,18 @@ img_transform_size = 128
 BATCH_SIZE = 64
 LEARNING_RATE = .0001
 
+# ?? ??m/ep
+# img_transform_size = 608
+# BATCH_SIZE = 64
+# LEARNING_RATE = .0001
+
 # Decent Results, 4m/ep
 # img_transform_size = 608
 # BATCH_SIZE = 15
 # LEARNING_RATE = .0001
 
 best_losses = 1e10
-epochs = 2
+epochs = 6
 
 use_gpu = torch.cuda.is_available()
 
@@ -117,7 +122,6 @@ class Net(nn.Module):
         MIDLEVEL_FEATURE_SIZE = 128
 
         ## First half: ResNet
-        # resnet = models.resnet18(num_classes=365)
         resnet = models.resnet18(weights='ResNet18_Weights.IMAGENET1K_V1')
         # Change first conv layer to accept single-channel (grayscale) input
         resnet.conv1.weight = nn.Parameter(resnet.conv1.weight.sum(dim=1).unsqueeze(1)) 
@@ -277,4 +281,5 @@ fig.suptitle("Training Loss vs Epoch")
 ax.set_xlabel("epoch")
 ax.set_ylabel("loss")
 fig.tight_layout()
+# fig.show()
 plt.show()
