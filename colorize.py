@@ -77,7 +77,7 @@ def merge_lab_to_rgb(L_input, AB_input):
     LAB[:,:,0] = LAB[:,:,0] * 100
     LAB[:,:,1:3] = LAB[:,:,1:3] * 255 - 128
     RGB = lab2rgb(LAB.astype(np.float64))
-    return RGB
+    return RGB, LAB
 
 
 def colorize(img_path):
@@ -96,7 +96,7 @@ def colorize(img_path):
         AB_output = model(L_input)
 
     print(f"L: {L_input.shape}, AB: {AB_output.shape}")
-    RGB = merge_lab_to_rgb(L_input.cpu().squeeze(0), AB_output.detach().cpu().squeeze(0))
+    RGB, LAB = merge_lab_to_rgb(L_input.cpu().squeeze(0), AB_output.detach().cpu().squeeze(0))
 
     height_diff = 608 - original_shape[0]
     width_diff = 608 - original_shape[1]
@@ -107,14 +107,36 @@ def colorize(img_path):
     crop_right = crop_left + original_shape[1]
 
     RGB = RGB[crop_top:crop_bottom, crop_left:crop_right]
+    LAB = LAB[crop_top:crop_bottom, crop_left:crop_right]
 
-    return RGB
+    return RGB, LAB
 
 if __name__ == "__main__":
     img_path = "datasets\\source_images_compressed\\canada_20190809_141717.jpg"
-    RGB = colorize(img_path)
+    RGB, LAB = colorize(img_path)
     print(f"RGB Array: {RGB.shape}, {RGB.dtype}")
-    # plt.imshow(RGB)
-    plt.imshow(RGB)
+    print(f"LAB Array: {LAB.shape}, {LAB.dtype}")
+
+    fig, axes = plt.subplots(2,4)
+    
+    axes[1,0].imshow(RGB[:,:,0], vmin=0, vmax=255, cmap='Reds')
+    axes[1,1].imshow(RGB[:,:,1], vmin=0, vmax=255, cmap='Greens')
+    axes[1,2].imshow(RGB[:,:,2], vmin=0, vmax=255, cmap='Blues')
+    axes[1,3].imshow(RGB)
+    axes[1,0].set_title("R")
+    axes[1,1].set_title("G")
+    axes[1,2].set_title("B")
+    axes[1,3].set_title("RGB")
+
+    axes[0,0].imshow(LAB[:,:,0], cmap='gray')
+    axes[0,1].imshow(LAB[:,:,1], cmap='gray')
+    axes[0,2].imshow(LAB[:,:,2], cmap='gray')
+    axes[0,0].set_title("L")
+    axes[0,1].set_title("A")
+    axes[0,2].set_title("B")
+
+    for ax in axes.flat:
+        ax.axis('off')
+    fig.tight_layout()
     plt.show()
     
