@@ -138,9 +138,14 @@ if __name__ == "__main__":
 
     fig, axes = plt.subplots(3,4)
     
+    # cmaps for LAB:
+    # L: black to white (cmap='gray') | generally [0,100]
+    # A: green to red | generally [-100,100] or [-128,127]
+    # B: blue to yellow | generally [-100,100] or [-128,127]
+
     axes[0,0].imshow(LAB[:,:,0], cmap='gray')
-    axes[0,1].imshow(LAB[:,:,1], cmap='gray')
-    axes[0,2].imshow(LAB[:,:,2], cmap='gray')
+    axes[0,1].imshow(LAB[:,:,1], cmap='PiYG_r')
+    axes[0,2].imshow(LAB[:,:,2], cmap='BrBG_r')
     axes[0,0].set_title("L")
     axes[0,1].set_title("A")
     axes[0,2].set_title("B")
