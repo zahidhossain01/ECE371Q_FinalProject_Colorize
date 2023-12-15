@@ -74,13 +74,12 @@ def squarepad(img, sidelength=608):
 def merge_lab_to_rgb(L_input, AB_input):
     LAB = torch.cat((L_input, AB_input), 0).numpy()
     LAB = LAB.transpose((1,2,0))
-    color_image = np.copy(LAB)
-    color_image[:,:,0] = color_image[:,:,0] * (100/255)
-    color_image[:,:,1:3] = color_image[:,:,1:3]
-    # color_image[:,:,0] = color_image[:,:,0] * 100
-    # color_image[:,:,1:3] = color_image[:,:,1:3] * 255 - 128
-    RGB = lab2rgb(color_image.astype(np.float64))
-    return RGB, LAB
+    intermediate = np.copy(LAB).astype(np.float64)
+    intermediate[:,:,0] = intermediate[:,:,0] * (100/255)
+    intermediate[:,:,1:3] = intermediate[:,:,1:3]
+    # RGB = lab2rgb(intermediate.astype(np.float64))
+    RGB = lab2rgb(intermediate)
+    return RGB, LAB, intermediate
 
 
 def colorize(img_path):
@@ -99,7 +98,7 @@ def colorize(img_path):
         AB_output = model(L_input)
 
     print(f"L: {L_input.shape}, AB: {AB_output.shape}")
-    RGB, LAB = merge_lab_to_rgb(L_input.cpu().squeeze(0), AB_output.detach().cpu().squeeze(0))
+    RGB, LAB, intermediate = merge_lab_to_rgb(L_input.cpu().squeeze(0), AB_output.detach().cpu().squeeze(0))
 
     height_diff = 608 - original_shape[0]
     width_diff = 608 - original_shape[1]
@@ -111,38 +110,45 @@ def colorize(img_path):
 
     RGB = RGB[crop_top:crop_bottom, crop_left:crop_right]
     LAB = LAB[crop_top:crop_bottom, crop_left:crop_right]
+    intermediate = intermediate[crop_top:crop_bottom, crop_left:crop_right]
 
-    return RGB, LAB
+    return RGB, LAB, intermediate
 
 if __name__ == "__main__":
     img_path = "datasets\\source_images_compressed\\canada_20190809_141717.jpg"
-    RGB, LAB = colorize(img_path)
+    RGB, LAB, LAB_int = colorize(img_path)
     print()
 
     print(f"RGB Array: {RGB.shape}, {RGB.dtype}")
     print(f"LAB Array: {LAB.shape}, {LAB.dtype}")
+    print(f"LAB_int Array: {LAB_int.shape}, {LAB_int.dtype}")
     print()
 
-    print(f"R | min: {np.min(RGB[:,:,0])}, max: {np.max(RGB[:,:,0])}")
-    print(f"G | min: {np.min(RGB[:,:,1])}, max: {np.max(RGB[:,:,1])}")
-    print(f"B | min: {np.min(RGB[:,:,2])}, max: {np.max(RGB[:,:,2])}")
+    print(f"R | min: {np.min(RGB[:,:,0]):.2f},\t max: {np.max(RGB[:,:,0]):.2f}")
+    print(f"G | min: {np.min(RGB[:,:,1]):.2f},\t max: {np.max(RGB[:,:,1]):.2f}")
+    print(f"B | min: {np.min(RGB[:,:,2]):.2f},\t max: {np.max(RGB[:,:,2]):.2f}")
     print()
 
-    print(f"L | min: {np.min(LAB[:,:,0])}, max: {np.max(LAB[:,:,0])}")
-    print(f"A | min: {np.min(LAB[:,:,1])}, max: {np.max(LAB[:,:,1])}")
-    print(f"B | min: {np.min(LAB[:,:,2])}, max: {np.max(LAB[:,:,2])}")
+    print(f"L | min: {np.min(LAB[:,:,0]):.2f},\t max: {np.max(LAB[:,:,0]):.2f}")
+    print(f"A | min: {np.min(LAB[:,:,1]):.2f},\t max: {np.max(LAB[:,:,1]):.2f}")
+    print(f"B | min: {np.min(LAB[:,:,2]):.2f},\t max: {np.max(LAB[:,:,2]):.2f}")
     print()
 
-    fig, axes = plt.subplots(2,4)
+    print(f"L*| min: {np.min(LAB_int[:,:,0]):.2f},\t max: {np.max(LAB_int[:,:,0]):.2f}")
+    print(f"A*| min: {np.min(LAB_int[:,:,1]):.2f},\t max: {np.max(LAB_int[:,:,1]):.2f}")
+    print(f"B*| min: {np.min(LAB_int[:,:,2]):.2f},\t max: {np.max(LAB_int[:,:,2]):.2f}")
+    print()
+
+    fig, axes = plt.subplots(3,4)
     
-    axes[1,0].imshow(RGB[:,:,0], vmin=0, vmax=1, cmap='Reds')
-    axes[1,1].imshow(RGB[:,:,1], vmin=0, vmax=1, cmap='Greens')
-    axes[1,2].imshow(RGB[:,:,2], vmin=0, vmax=1, cmap='Blues')
-    axes[1,3].imshow(RGB)
-    axes[1,0].set_title("R")
-    axes[1,1].set_title("G")
-    axes[1,2].set_title("B")
-    axes[1,3].set_title("RGB")
+    axes[2,0].imshow(RGB[:,:,0], vmin=0, vmax=1, cmap='Reds')
+    axes[2,1].imshow(RGB[:,:,1], vmin=0, vmax=1, cmap='Greens')
+    axes[2,2].imshow(RGB[:,:,2], vmin=0, vmax=1, cmap='Blues')
+    axes[2,3].imshow(RGB)
+    axes[2,0].set_title("R")
+    axes[2,1].set_title("G")
+    axes[2,2].set_title("B")
+    axes[2,3].set_title("RGB")
 
     axes[0,0].imshow(LAB[:,:,0], cmap='gray')
     axes[0,1].imshow(LAB[:,:,1], cmap='gray')
@@ -150,6 +156,13 @@ if __name__ == "__main__":
     axes[0,0].set_title("L")
     axes[0,1].set_title("A")
     axes[0,2].set_title("B")
+
+    axes[1,0].imshow(LAB_int[:,:,0], cmap='gray')
+    axes[1,1].imshow(LAB_int[:,:,1], cmap='gray')
+    axes[1,2].imshow(LAB_int[:,:,2], cmap='gray')
+    axes[1,0].set_title("L*")
+    axes[1,1].set_title("A*")
+    axes[1,2].set_title("B*")
 
     for ax in axes.flat:
         ax.axis('off')
