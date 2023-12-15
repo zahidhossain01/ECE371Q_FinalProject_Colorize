@@ -4,7 +4,7 @@ import torchvision.models as models
 import PIL.Image
 import PIL.ImageOps
 import numpy as np
-from skimage.color import lab2rgb, rgb2gray
+from skimage.color import lab2rgb, rgb2gray, rgb2lab
 import matplotlib.pyplot as plt
 import os
 
@@ -116,24 +116,27 @@ def colorize(img_path):
 
 if __name__ == "__main__":
     img_path = "datasets\\source_images_compressed\\canada_20190809_141717.jpg"
-    RGB, LAB, LAB_int = colorize(img_path)
+    # RGB, LAB, LAB_int = colorize(img_path)
+    RGB = np.copy(np.asarray(PIL.Image.open(img_path)))
+    LAB = rgb2lab(RGB)
+    LAB_int = np.copy(LAB)
     print()
 
     print(f"LAB Array: {LAB.shape}, {LAB.dtype}")
     print(f"LAB_int Array: {LAB_int.shape}, {LAB_int.dtype}")
     print(f"RGB Array: {RGB.shape}, {RGB.dtype}")
     print()
-    print(f"L | min: {np.min(LAB[:,:,0]):.2f},\t max: {np.max(LAB[:,:,0]):.2f}")
-    print(f"A | min: {np.min(LAB[:,:,1]):.2f},\t max: {np.max(LAB[:,:,1]):.2f}")
-    print(f"B | min: {np.min(LAB[:,:,2]):.2f},\t max: {np.max(LAB[:,:,2]):.2f}")
+    print(f"L | min: {np.min(LAB[:,:,0]):.2f}, max: {np.max(LAB[:,:,0]):.2f}")
+    print(f"A | min: {np.min(LAB[:,:,1]):.2f}, max: {np.max(LAB[:,:,1]):.2f}")
+    print(f"B | min: {np.min(LAB[:,:,2]):.2f}, max: {np.max(LAB[:,:,2]):.2f}")
     print()
-    print(f"L*| min: {np.min(LAB_int[:,:,0]):.2f},\t max: {np.max(LAB_int[:,:,0]):.2f}")
-    print(f"A*| min: {np.min(LAB_int[:,:,1]):.2f},\t max: {np.max(LAB_int[:,:,1]):.2f}")
-    print(f"B*| min: {np.min(LAB_int[:,:,2]):.2f},\t max: {np.max(LAB_int[:,:,2]):.2f}")
+    print(f"L*| min: {np.min(LAB_int[:,:,0]):.2f}, max: {np.max(LAB_int[:,:,0]):.2f}")
+    print(f"A*| min: {np.min(LAB_int[:,:,1]):.2f}, max: {np.max(LAB_int[:,:,1]):.2f}")
+    print(f"B*| min: {np.min(LAB_int[:,:,2]):.2f}, max: {np.max(LAB_int[:,:,2]):.2f}")
     print()
-    print(f"R | min: {np.min(RGB[:,:,0]):.2f},\t max: {np.max(RGB[:,:,0]):.2f}")
-    print(f"G | min: {np.min(RGB[:,:,1]):.2f},\t max: {np.max(RGB[:,:,1]):.2f}")
-    print(f"B | min: {np.min(RGB[:,:,2]):.2f},\t max: {np.max(RGB[:,:,2]):.2f}")
+    print(f"R | min: {np.min(RGB[:,:,0]):.2f}, max: {np.max(RGB[:,:,0]):.2f}")
+    print(f"G | min: {np.min(RGB[:,:,1]):.2f}, max: {np.max(RGB[:,:,1]):.2f}")
+    print(f"B | min: {np.min(RGB[:,:,2]):.2f}, max: {np.max(RGB[:,:,2]):.2f}")
     print()
 
     fig, axes = plt.subplots(3,4)
@@ -144,15 +147,15 @@ if __name__ == "__main__":
     # B: blue to yellow | generally [-100,100] or [-128,127]
 
     axes[0,0].imshow(LAB[:,:,0], cmap='gray')
-    axes[0,1].imshow(LAB[:,:,1], cmap='PiYG_r')
-    axes[0,2].imshow(LAB[:,:,2], cmap='BrBG_r')
+    axes[0,1].imshow(LAB[:,:,1], cmap='gray')
+    axes[0,2].imshow(LAB[:,:,2], cmap='gray')
     axes[0,0].set_title("L")
     axes[0,1].set_title("A")
     axes[0,2].set_title("B")
 
-    axes[1,0].imshow(LAB_int[:,:,0], cmap='gray')
-    axes[1,1].imshow(LAB_int[:,:,1], cmap='gray')
-    axes[1,2].imshow(LAB_int[:,:,2], cmap='gray')
+    axes[1,0].imshow(LAB_int[:,:,0], vmin=0, vmax=100, cmap='gray')
+    axes[1,1].imshow(LAB_int[:,:,1], cmap='PiYG_r')
+    axes[1,2].imshow(LAB_int[:,:,2], cmap='BrBG_r')
     axes[1,0].set_title("L*")
     axes[1,1].set_title("A*")
     axes[1,2].set_title("B*")
