@@ -74,9 +74,12 @@ def squarepad(img, sidelength=608):
 def merge_lab_to_rgb(L_input, AB_input):
     LAB = torch.cat((L_input, AB_input), 0).numpy()
     LAB = LAB.transpose((1,2,0))
-    LAB[:,:,0] = LAB[:,:,0] * 100
-    LAB[:,:,1:3] = LAB[:,:,1:3] * 255 - 128
-    RGB = lab2rgb(LAB.astype(np.float64))
+    color_image = np.copy(LAB)
+    color_image[:,:,0] = color_image[:,:,0] * (100/255)
+    color_image[:,:,1:3] = color_image[:,:,1:3]
+    # color_image[:,:,0] = color_image[:,:,0] * 100
+    # color_image[:,:,1:3] = color_image[:,:,1:3] * 255 - 128
+    RGB = lab2rgb(color_image.astype(np.float64))
     return RGB, LAB
 
 
@@ -114,14 +117,27 @@ def colorize(img_path):
 if __name__ == "__main__":
     img_path = "datasets\\source_images_compressed\\canada_20190809_141717.jpg"
     RGB, LAB = colorize(img_path)
+    print()
+
     print(f"RGB Array: {RGB.shape}, {RGB.dtype}")
     print(f"LAB Array: {LAB.shape}, {LAB.dtype}")
+    print()
+
+    print(f"R | min: {np.min(RGB[:,:,0])}, max: {np.max(RGB[:,:,0])}")
+    print(f"G | min: {np.min(RGB[:,:,1])}, max: {np.max(RGB[:,:,1])}")
+    print(f"B | min: {np.min(RGB[:,:,2])}, max: {np.max(RGB[:,:,2])}")
+    print()
+
+    print(f"L | min: {np.min(LAB[:,:,0])}, max: {np.max(LAB[:,:,0])}")
+    print(f"A | min: {np.min(LAB[:,:,1])}, max: {np.max(LAB[:,:,1])}")
+    print(f"B | min: {np.min(LAB[:,:,2])}, max: {np.max(LAB[:,:,2])}")
+    print()
 
     fig, axes = plt.subplots(2,4)
     
-    axes[1,0].imshow(RGB[:,:,0], vmin=0, vmax=255, cmap='Reds')
-    axes[1,1].imshow(RGB[:,:,1], vmin=0, vmax=255, cmap='Greens')
-    axes[1,2].imshow(RGB[:,:,2], vmin=0, vmax=255, cmap='Blues')
+    axes[1,0].imshow(RGB[:,:,0], vmin=0, vmax=1, cmap='Reds')
+    axes[1,1].imshow(RGB[:,:,1], vmin=0, vmax=1, cmap='Greens')
+    axes[1,2].imshow(RGB[:,:,2], vmin=0, vmax=1, cmap='Blues')
     axes[1,3].imshow(RGB)
     axes[1,0].set_title("R")
     axes[1,1].set_title("G")
