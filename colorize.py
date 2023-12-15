@@ -119,37 +119,25 @@ if __name__ == "__main__":
     RGB, LAB, LAB_int = colorize(img_path)
     print()
 
-    print(f"RGB Array: {RGB.shape}, {RGB.dtype}")
     print(f"LAB Array: {LAB.shape}, {LAB.dtype}")
     print(f"LAB_int Array: {LAB_int.shape}, {LAB_int.dtype}")
+    print(f"RGB Array: {RGB.shape}, {RGB.dtype}")
     print()
-
+    print(f"L | min: {np.min(LAB[:,:,0]):.2f},\t max: {np.max(LAB[:,:,0]):.2f}")
+    print(f"A | min: {np.min(LAB[:,:,1]):.2f},\t max: {np.max(LAB[:,:,1]):.2f}")
+    print(f"B | min: {np.min(LAB[:,:,2]):.2f},\t max: {np.max(LAB[:,:,2]):.2f}")
+    print()
+    print(f"L*| min: {np.min(LAB_int[:,:,0]):.2f},\t max: {np.max(LAB_int[:,:,0]):.2f}")
+    print(f"A*| min: {np.min(LAB_int[:,:,1]):.2f},\t max: {np.max(LAB_int[:,:,1]):.2f}")
+    print(f"B*| min: {np.min(LAB_int[:,:,2]):.2f},\t max: {np.max(LAB_int[:,:,2]):.2f}")
+    print()
     print(f"R | min: {np.min(RGB[:,:,0]):.2f},\t max: {np.max(RGB[:,:,0]):.2f}")
     print(f"G | min: {np.min(RGB[:,:,1]):.2f},\t max: {np.max(RGB[:,:,1]):.2f}")
     print(f"B | min: {np.min(RGB[:,:,2]):.2f},\t max: {np.max(RGB[:,:,2]):.2f}")
     print()
 
-    print(f"L | min: {np.min(LAB[:,:,0]):.2f},\t max: {np.max(LAB[:,:,0]):.2f}")
-    print(f"A | min: {np.min(LAB[:,:,1]):.2f},\t max: {np.max(LAB[:,:,1]):.2f}")
-    print(f"B | min: {np.min(LAB[:,:,2]):.2f},\t max: {np.max(LAB[:,:,2]):.2f}")
-    print()
-
-    print(f"L*| min: {np.min(LAB_int[:,:,0]):.2f},\t max: {np.max(LAB_int[:,:,0]):.2f}")
-    print(f"A*| min: {np.min(LAB_int[:,:,1]):.2f},\t max: {np.max(LAB_int[:,:,1]):.2f}")
-    print(f"B*| min: {np.min(LAB_int[:,:,2]):.2f},\t max: {np.max(LAB_int[:,:,2]):.2f}")
-    print()
-
     fig, axes = plt.subplots(3,4)
     
-    axes[2,0].imshow(RGB[:,:,0], vmin=0, vmax=1, cmap='Reds')
-    axes[2,1].imshow(RGB[:,:,1], vmin=0, vmax=1, cmap='Greens')
-    axes[2,2].imshow(RGB[:,:,2], vmin=0, vmax=1, cmap='Blues')
-    axes[2,3].imshow(RGB)
-    axes[2,0].set_title("R")
-    axes[2,1].set_title("G")
-    axes[2,2].set_title("B")
-    axes[2,3].set_title("RGB")
-
     axes[0,0].imshow(LAB[:,:,0], cmap='gray')
     axes[0,1].imshow(LAB[:,:,1], cmap='gray')
     axes[0,2].imshow(LAB[:,:,2], cmap='gray')
@@ -163,6 +151,15 @@ if __name__ == "__main__":
     axes[1,0].set_title("L*")
     axes[1,1].set_title("A*")
     axes[1,2].set_title("B*")
+
+    axes[2,0].imshow(RGB[:,:,0], vmin=0, vmax=1, cmap='Reds')
+    axes[2,1].imshow(RGB[:,:,1], vmin=0, vmax=1, cmap='Greens')
+    axes[2,2].imshow(RGB[:,:,2], vmin=0, vmax=1, cmap='Blues')
+    axes[2,3].imshow(RGB)
+    axes[2,0].set_title("R")
+    axes[2,1].set_title("G")
+    axes[2,2].set_title("B")
+    axes[2,3].set_title("RGB")
 
     for ax in axes.flat:
         ax.axis('off')
