@@ -116,10 +116,12 @@ def colorize(img_path):
 
 if __name__ == "__main__":
     img_path = "datasets\\source_images_compressed\\canada_20190809_141717.jpg"
-    # RGB, LAB, LAB_int = colorize(img_path)
-    RGB = np.copy(np.asarray(PIL.Image.open(img_path)))
-    LAB = rgb2lab(RGB)
-    LAB_int = np.copy(LAB)
+    RGB, LAB, LAB_int = colorize(img_path)
+
+    # RGB = np.copy(np.asarray(PIL.Image.open(img_path)))
+    # LAB = rgb2lab(RGB)
+    # LAB_int = np.copy(LAB)
+
     print()
 
     print(f"LAB Array: {LAB.shape}, {LAB.dtype}")
